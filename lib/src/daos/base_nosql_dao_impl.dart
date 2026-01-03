@@ -1,8 +1,8 @@
 import 'package:virnavi_common_sdk/virnavi_common_sdk.dart';
 import 'package:isar_community/isar.dart';
 
-import 'package:virnavi_isar_e2m/src/entities/base_nosql_entity.dart';
-import 'package:virnavi_isar_e2m/src/daos/base_nosql_dao.dart';
+import '../entities/base_nosql_entity.dart';
+import 'base_nosql_dao.dart';
 
 abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     implements BaseNoSqlDao<Model, IdType> {
@@ -10,15 +10,17 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
 
   BaseNoSqlDaoImpl();
 
-  @override
-  Future<void> clear({String? correlationId}) async {
-    await entityCollection.isar.writeTxn(
-      () async => await entityCollection.buildQuery().deleteAll(),
-    );
+  Future<void> clear({
+    String? correlationId,
+  }) async {
+    await entityCollection.isar
+        .writeTxn(() async => await entityCollection.buildQuery().deleteAll());
   }
 
-  @override
-  Future<Optional<Model>> getById(IdType id, {String? correlationId}) async {
+  Future<Optional<Model>> getById(
+    IdType id, {
+    String? correlationId,
+  }) async {
     final data = await idEqual(entityCollection.where(), id).findFirst();
     return convertToModel(data);
   }
@@ -28,7 +30,7 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     IdType id, {
     String? correlationId,
   }) async {
-    final query = idEqual(entityCollection.where(), id).build();
+    final query = await idEqual(entityCollection.where(), id).build();
     final dataListStream = query.watch(fireImmediately: true);
     return ModelListStreamImpl<Model, Entity>(
       stream: dataListStream,
@@ -37,10 +39,11 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
   }
 
   @override
-  Future<List<Model>> getAll({String? correlationId}) async {
-    final entityList = await entityCollection.isar.txn(
-      () async => await entityCollection.where().findAll(),
-    );
+  Future<List<Model>> getAll({
+    String? correlationId,
+  }) async {
+    final entityList = await entityCollection.isar
+        .txn(() async => await entityCollection.where().findAll());
     final list = <Model>[];
     for (Entity entity in entityList) {
       list.add(convertToModel(entity).data);
@@ -65,7 +68,7 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     List<IdType> idList, {
     String? correlationId,
   }) async {
-    final query = _buildQuery(idList, correlationId: correlationId);
+    final query = _buildQuery(idList);
     final entityList = await query.findAll();
     final list = <Model>[];
     for (Entity entity in entityList) {
@@ -79,7 +82,7 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     List<IdType> idList, {
     String? correlationId,
   }) async {
-    final query = _buildQuery(idList, correlationId: correlationId);
+    final query = _buildQuery(idList);
     final dataListStream = query.watch(fireImmediately: true);
     return ModelStreamImpl<List<Model>, List<Entity>>(
       stream: dataListStream,
@@ -87,13 +90,14 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     );
   }
 
-  Query<Entity> _buildQuery(List<IdType> idList, {String? correlationId}) {
+  Query<Entity> _buildQuery(
+    List<IdType> idList, {
+    String? correlationId,
+  }) {
     if (idList.isNotEmpty) {
       final where = entityCollection.where();
-      QueryBuilder<Entity, Entity, QAfterWhereClause> queryBuilder = idEqual(
-        where,
-        idList[0],
-      );
+      QueryBuilder<Entity, Entity, QAfterWhereClause> queryBuilder =
+          idEqual(where, idList[0]);
       for (int i = 1; i < idList.length; i++) {
         queryBuilder = idEqual(queryBuilder.or(), idList[i]);
       }
@@ -102,15 +106,15 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     return entityCollection.buildQuery();
   }
 
-  @override
-  Future<void> upsert(Model model, {String? correlationId}) async {
+  Future<void> upsert(
+    Model model, {
+    String? correlationId,
+  }) async {
     final entityOption = convertToEntity(model);
     await entityCollection.isar.writeTxn(() async {
       final entity = entityOption.data;
-      final currentInstance = await idEqual(
-        entityCollection.where(),
-        idFromModel(model),
-      ).findFirst();
+      final currentInstance =
+          await idEqual(entityCollection.where(), idFromModel(model)).findFirst();
       if (currentInstance != null) {
         entity.tempId = currentInstance.tempId;
       }
@@ -118,17 +122,17 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     });
   }
 
-  @override
-  Future<void> upsertAll(List<Model> dataList, {String? correlationId}) async {
+  Future<void> upsertAll(
+    List<Model> dataList, {
+    String? correlationId,
+  }) async {
     await entityCollection.isar.writeTxn(() async {
       final List<Entity> entityList = [];
 
       for (var model in dataList) {
         final entity = convertToEntity(model).data;
-        final currentInstance = await idEqual(
-          entityCollection.where(),
-          idFromModel(model),
-        ).findFirst();
+        final currentInstance =
+            await idEqual(entityCollection.where(), idFromModel(model)).findFirst();
         if (currentInstance != null) {
           entity.tempId = currentInstance.tempId;
         }
@@ -138,15 +142,18 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
     });
   }
 
-  @override
-  Future<void> delete(IdType id, {String? correlationId}) async {
+  Future<void> delete(
+    IdType id, {
+    String? correlationId,
+  }) async {
     await entityCollection.isar.writeTxn(
-      () async => await idEqual(entityCollection.where(), id).deleteFirst(),
-    );
+        () async => await idEqual(entityCollection.where(), id).deleteFirst());
   }
 
-  @override
-  Future<void> deleteAll(List<IdType> idList, {String? correlationId}) async {
+  Future<void> deleteAll(
+    List<IdType> idList, {
+    String? correlationId,
+  }) async {
     final list = <Future>[];
     for (IdType idType in idList) {
       list.add(delete(idType));
@@ -159,9 +166,7 @@ abstract class BaseNoSqlDaoImpl<Model, Entity extends BaseNoSqlEntity, IdType>
   IdType idFromModel(Model model);
 
   QueryBuilder<Entity, Entity, QAfterWhereClause> idEqual(
-    QueryBuilder<Entity, Entity, QWhereClause> queryBuilder,
-    IdType value,
-  );
+      QueryBuilder<Entity, Entity, QWhereClause> queryBuilder, IdType value);
 
   Optional<Model> convertToModel(Entity? entity);
 
