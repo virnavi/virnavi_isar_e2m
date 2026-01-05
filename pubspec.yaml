@@ -4,7 +4,7 @@ version: 0.0.1
 homepage:
 repository: https://github.com/virnavi/virnavi_isar_e2m
 
-isar_version: &isar_version 3.3.0
+isar_version: &isar_version ^3.3.0
 
 environment:
   sdk: ^3.9.2
@@ -13,11 +13,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  virnavi_common_sdk: 0.0.1
-  isar_community:
-    version: *isar_version
-  isar_community_flutter_libs: # contains Isar Core
-    version: *isar_version
+  virnavi_common_sdk: ^0.0.1
+  isar_community: ^3.3.0
+  isar_community_flutter_libs: ^3.3.0
 
 dev_dependencies:
   flutter_test:

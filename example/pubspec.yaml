@@ -30,7 +30,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  virnavi_common_sdk:
+  virnavi_common_sdk: ^0.0.1
+  virnavi_isar_e2m:
     path: ../
 
   # The following adds the Cupertino Icons font to your application.
