@@ -1,51 +1,36 @@
+import 'package:example/data/database/dao_impl/note_dao_impl.dart';
+import 'package:example/data/database/dao_impl/user_dao_impl.dart';
+import 'package:example/data/database/database.dart';
+import 'package:example/ui/home/cubits/note/note_cubit.dart';
+import 'package:example/ui/home/cubits/user/user_cubit.dart';
+import 'package:example/ui/home/home_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Database.initialize();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Virnavi Isar E2M',
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => NoteCubit(NoteDaoImpl())),
+        BlocProvider(create: (context) => UserCubit(UserDaoImpl())),
+      ],
+      child: MaterialApp(
+        title: 'Virnavi Isar E2M',
 
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Virnavi Isar E2M'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          spacing: 20,
-          children: <Widget>[],
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         ),
+        home: HomeScreen(),
       ),
-      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
