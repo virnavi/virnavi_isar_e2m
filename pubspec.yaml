@@ -1,7 +1,7 @@
 name: virnavi_isar_e2m
 description: "A generic Isar DAO wrapper** that bridges the gap between Isar entities and domain models, streamlining NoSQL database interactions in Flutter applications."
 version: 0.0.1
-homepage:
+homepage: https://www.virnavi.com
 repository: https://github.com/virnavi/virnavi_isar_e2m
 
 isar_version: &isar_version ^3.3.0
